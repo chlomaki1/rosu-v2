@@ -325,6 +325,8 @@ pub struct UserExtended {
     pub is_online: bool,
     /// does this user have supporter?
     pub is_supporter: bool,
+    /// has this user been restricted? (only present on currently authenticated user)
+    pub is_restricted: Option<bool>,
     /// date of account creation
     #[serde(with = "serde_util::datetime")]
     pub join_date: OffsetDateTime,
@@ -521,6 +523,8 @@ pub struct User {
     pub is_online: bool,
     /// does this user have supporter?
     pub is_supporter: bool,
+    /// has this user been restricted? (only present on currently authenticated user)
+    pub is_restricted: Option<bool>,
     /// last access time. `None` if the user hides online presence
     #[serde(
         default,
@@ -673,6 +677,7 @@ impl From<UserExtended> for User {
             is_deleted: user.is_deleted,
             is_online: user.is_online,
             is_supporter: user.is_supporter,
+            is_restricted: user.is_restricted,
             last_visit: user.last_visit,
             pm_friends_only: user.pm_friends_only,
             profile_color: user.profile_color,
@@ -727,7 +732,7 @@ pub(crate) struct Users {
 pub struct UserCover {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub custom_url: Option<String>,
-    pub url: String,
+    pub url: Option<String>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub id: Option<String>,
 }

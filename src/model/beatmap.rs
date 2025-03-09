@@ -407,6 +407,7 @@ fn deser_mapset_user<'de, D: Deserializer<'de>>(d: D) -> Result<Option<Box<User>
                 is_moderator: None,
                 is_nat: None,
                 is_silenced: None,
+                is_restricted: None,
                 loved_mapset_count: None,
                 medals: None,
                 monthly_playcounts: None,
