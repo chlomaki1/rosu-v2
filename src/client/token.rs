@@ -157,6 +157,7 @@ pub(super) enum AuthorizationBuilder {
 impl AuthorizationBuilder {
     #[cfg(feature = "local_oauth")]
     pub(super) async fn perform_local_oauth(
+        client_url: String,
         redirect_uri: String,
         client_id: u64,
         scopes: Scopes,
@@ -189,7 +190,7 @@ impl AuthorizationBuilder {
             .map_err(OAuthError::Listener)?;
 
         let mut url = format!(
-            "https://osu.ppy.sh/oauth/authorize?\
+            "{client_url}/oauth/authorize?\
                 client_id={client_id}\
                 &redirect_uri={redirect_uri}\
                 &response_type=code",

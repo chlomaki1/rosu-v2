@@ -615,6 +615,7 @@ impl Drop for Osu {
 type Body = Full<Bytes>;
 
 pub(crate) struct OsuRef {
+    url: String,
     client_id: u64,
     client_secret: Box<str>,
     http: HyperClient<HttpsConnector<HttpConnector>, Body>,
@@ -676,7 +677,7 @@ impl OsuRef {
         let bytes = body.into_bytes();
         let len = bytes.len();
         let body = Full::from(bytes);
-        let url = "https://osu.ppy.sh/oauth/token";
+        let url = format!("{}/oauth/token", self.url);
 
         let req = HyperRequest::post(url)
             .header(USER_AGENT, MY_USER_AGENT)
@@ -708,12 +709,13 @@ impl OsuRef {
             api_version,
         } = req;
 
+        let url = self.url.clone();
         let (method, path) = route.to_parts();
 
         #[cfg(feature = "metrics")]
         let start = std::time::Instant::now();
 
-        let mut url = format!("https://osu.ppy.sh/api/v2/{path}");
+        let mut url = format!("{url}/api/v2/{path}");
 
         if let Some(ref query) = query {
             url.push('?');

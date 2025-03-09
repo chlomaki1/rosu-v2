@@ -20,6 +20,7 @@ use dashmap::DashMap;
 #[must_use]
 pub struct OsuBuilder {
     auth: Option<AuthorizationBuilder>,
+    url: Option<String>,
     client_id: Option<u64>,
     client_secret: Option<String>,
     retries: usize,
@@ -31,6 +32,7 @@ impl Default for OsuBuilder {
     fn default() -> Self {
         Self {
             auth: None,
+            url: Some("https://osu.ppy.sh/".to_string()),
             client_id: None,
             client_secret: None,
             retries: 2,
@@ -60,6 +62,7 @@ impl OsuBuilder {
     ///   - API did not provide a token for the given client id and client secret
     ///   - native roots are missing to build the https connector
     pub async fn build(self) -> OsuResult<Osu> {
+        let url = self.url.unwrap_or("https://osu.ppy.sh".to_string());
         let client_id = self.client_id.ok_or(OsuError::BuilderMissingId)?;
         let client_secret = self.client_secret.ok_or(OsuError::BuilderMissingSecret)?;
 
@@ -85,6 +88,7 @@ impl OsuBuilder {
             .build();
 
         let inner = Arc::new(OsuRef {
+            url,
             client_id,
             client_secret: client_secret.into_boxed_str(),
             http,
@@ -105,7 +109,7 @@ impl OsuBuilder {
                 scopes,
             }) => {
                 let auth_kind =
-                    AuthorizationBuilder::perform_local_oauth(redirect_uri, client_id, scopes)
+                    AuthorizationBuilder::perform_local_oauth(url, redirect_uri, client_id, scopes)
                         .await
                         .map(AuthorizationKind::User)?;
 
@@ -145,6 +149,15 @@ impl OsuBuilder {
             }
             None => build_with_refresh(inner, AuthorizationKind::default()).await,
         }
+    }
+
+    /// Set the API url.
+    ///
+    /// By default, the API url is set to `https://osu.ppy.sh/`.
+    pub fn url(mut self, url: impl Into<String>) -> Self {
+        self.url = Some(url.into());
+
+        self
     }
 
     /// Set the client id of the application.
